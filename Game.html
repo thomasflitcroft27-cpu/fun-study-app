@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 10 Maths Career Ladder</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .game-container {
+            max-width: 650px;
+            width: 100%;
+            background-color: #2d2d2d;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #4caf50;
+            margin-top: 0;
+        }
+        .stats {
+            background-color: #3d3d3d;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 5px;
+            border-left: 5px solid #4caf50;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            margin-top: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #3d3d3d;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .challenge-box {
+            background: #222;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        #math-input {
+            padding: 8px;
+            font-size: 1.1rem;
+            width: 160px;
+            text-align: center;
+            margin-right: 10px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Career Ladder: Year 10 NZ Maths Edition</h1>
+    
+    <div class="stats">
+        <div>Money: <strong id="money-display">$100</strong></div>
+        <div>Job: <strong id="job-display">Unemployed</strong></div>
+    </div>
+
+    <div class="section">
+        <h2>Active Challenge</h2>
+        <p>Solve Year 10 level problems to climb the corporate ladder and get paid!</p>
+
+        <div id="math-box" class="challenge-box">
+            <h3 id="topic-display">Topic: Algebra / Equations</h3>
+            <p id="math-question" style="font-size: 1.3rem; margin: 15px 0; font-weight: bold;">Loading question...</p>
+            <input type="text" id="math-input" placeholder="Your answer">
+            <button style="width: auto;" onclick="checkMathAnswer()">Submit Answer</button>
+        </div>
+        
+        <p id="challenge-feedback" style="text-align:center; color: #ffeb3b; font-weight: bold; min-height: 20px;"></p>
+    </div>
+
+    <div class="section">
+        <h2>Unlock Better Careers</h2>
+        <div class="item-list">
+            <div class="item">
+                <div>
+                    <strong>Junior Assistant</strong><br>
+                    <small>Requires $120 induction training (Earns $40 per question)</small>
+                </div>
+                <button id="job1-btn" onclick="buyJob('Junior Assistant', 120, 40)">Unlock (-$120)</button>
+            </div>
+            <div class="item">
+                <div>
+                    <strong>Systems Administrator</strong><br>
+                    <small>Requires $500 network licence (Earns $150 per question)</small>
+                </div>
+                <button id="job2-btn" onclick="buyJob('Systems Administrator', 500, 150)">Unlock (-$500)</button>
+            </div>
+            <div class="item">
+                <div>
+                    <strong>Financial Engineer</strong><br>
+                    <small>Requires $2,000 advanced degree (Earns $600 per question)</small>
+                </div>
+                <button id="job3-btn" onclick="buyJob('Financial Engineer', 2000, 600)">Unlock (-$2,000)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Buy Better Stuff</h2>
+        <div class="item-list">
+            <div class="item">
+                <div><strong>Graphics Calculator (Casio)</strong> (+20% permanent bonus)</div>
+                <button id="gear1-btn" onclick="buyStuff('Graphics Calculator', 90, 1.20)">Buy (-$90)</button>
+            </div>
+            <div class="item">
+                <div><strong>Dual-Monitor Setup</strong> (+40% permanent bonus)</div>
+                <button id="gear2-btn" onclick="buyStuff('Dual-Monitor Setup', 450, 1.40)">Buy (-$450)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // GAME DATA STATE
+    let player = {
+        money: 100,
+        currentJob: "Unemployed",
+        payPerChallenge: 15, 
+        multiplier: 1.0,
+        unlockedJobs: [],
+        boughtStuff: []
+    };
+
+    // POOL OF YEAR 10 NZ CURRICULUM QUESTIONS
+    // note: Use '^' for indices where needed in prompt hints, but answers are simplified strings.
+    const questionBank = [
+        { q: "Expand: 3(x + 4)", a: "3x+12", topic: "Algebra: Expanding" },
+        { q: "Expand: x(x - 5)", a: "x^2-5x", topic: "Algebra: Expanding" },
+        { q: "Simplify: (m^5) / (m^2)", a: "m^3", topic: "Algebra: Index Laws" },
+        { q: "Simplify: (2a^3) * (4a^2)", a: "8a^5", topic: "Algebra: Index Laws" },
+        { q: "Factorise completely: 4x + 20", a: "4(x+5)", topic: "Algebra: Factorising" },
+        { q: "Solve for x: 3x + 4 = 19", a: "5", topic: "Equations" },
+        { q: "Solve for x: 2(x - 3) = 14", a: "10", topic: "Equations" },
+        { q: "Solve for y: 5y - 2 = 2y + 10", a: "4", topic: "Equations" },
+        { q: "Find the gradient (m) of the line: y = -3x + 7", a: "-3", topic: "Linear Graphs" },
+        { q: "Find the y-intercept (c) of the line: y = 2x - 5", a: "-5", topic: "Linear Graphs" },
+        { q: "If a price is $200 before 15% GST, what is the total price including GST?", a: "230", topic: "Financial Percentages" },
+        { q: "An item costs $120 and sells for $150. What is the percentage profit? (Do not include % sign)", a: "25", topic: "Percentages" },
+        { q: "Solve simultaneous equations for x:\nx + y = 10\nx - y = 4", a: "7", topic: "Simultaneous Equations" },
+        { q: "Find the missing side of a right-angled triangle if the shorts sides are 3cm and 4cm. (Pythagoras)", a: "5", topic: "Geometry" },
+        { q: "Find the value of x if x^2 = 144 and x is positive.", a: "12", topic: "Equations" },
+        { q: "Simplify: 4x^2 + 3x - x^2 + 2x", a: "3x^2+5x", topic: "Algebra" }
+    ];
+
+    let currentQuestionObj = null;
+
+    function updateUI() {
+        document.getElementById('money-display').innerText = "$" + Math.floor(player.money);
+        document.getElementById('job-display').innerText = player.currentJob;
+
+        // Disable conditions for jobs
+        document.getElementById('job1-btn').disabled = (player.money < 120 || player.unlockedJobs.includes('Junior Assistant'));
+        document.getElementById('job2-btn').disabled = (player.money < 500 || player.unlockedJobs.includes('Systems Administrator'));
+        document.getElementById('job3-btn').disabled = (player.money < 2000 || player.unlockedJobs.includes('Financial Engineer'));
+
+        // Disable conditions for gear
+        document.getElementById('gear1-btn').disabled = (player.money < 90 || player.boughtStuff.includes('Graphics Calculator'));
+        document.getElementById('gear2-btn').disabled = (player.money < 450 || player.boughtStuff.includes('Dual-Monitor Setup'));
+    }
+
+    function generateQuestion() {
+        let randomIndex = Math.floor(Math.random() * questionBank.length);
+        currentQuestionObj = questionBank[randomIndex];
+        
+        document.getElementById('topic-display').innerText = "Topic: " + currentQuestionObj.topic;
+        
+        // Convert newline characters into break elements for displaying system equations cleanly
+        let processedText = currentQuestionObj.q.replace(/\n/g, "<br>");
+        document.getElementById('math-question').innerHTML = processedText;
+        
+        document.getElementById('math-input').value = "";
+        document.getElementById('math-input').focus();
+    }
+
+    function checkMathAnswer() {
+        // Strip out spaces from user input to avoid penalty for spacing like "3x + 12" vs "3x+12"
+        let userAnswer = document.getElementById('math-input').value.replace(/\s+/g, '').toLowerCase();
+        let correctAnswer = currentQuestionObj.a.replace(/\s+/g, '').toLowerCase();
+        
+        if (userAnswer === correctAnswer) {
+            let payment = player.payPerChallenge * player.multiplier;
+            player.money += payment;
+            document.getElementById('challenge-feedback').style.color = "#4caf50";
+            document.getElementById('challenge-feedback').innerText = `Correct! Earned +$${payment.toFixed(1)}`;
+            updateUI();
+            generateQuestion(); 
+        } else {
+            document.getElementById('challenge-feedback').style.color = "#ff5722";
+            document.getElementById('challenge-feedback').innerText = "Incorrect answer. Give it another try!";
+        }
+    }
+
+    document.getElementById('math-input').addEventListener("keyup", function(event) {
+        if (event.key === "Enter") checkMathAnswer();
+    });
+
+    function buyJob(jobName, cost, newPay) {
+        if (player.money >= cost && !player.unlockedJobs.includes(jobName)) {
+            player.money -= cost;
+            player.currentJob = jobName;
+            player.payPerChallenge = newPay;
+            player.unlockedJobs.push(jobName);
+            updateUI();
+            document.getElementById('challenge-feedback').style.color = "#ffeb3b";
+            document.getElementById('challenge-feedback').innerText = `Hired as a ${jobName}!`;
+        }
+    }
+
+    function buyStuff(itemName, cost, multiBonus) {
+        if (player.money >= cost && !player.boughtStuff.includes(itemName)) {
+            player.money -= cost;
+            player.multiplier *= multiBonus;
+            player.boughtStuff.push(itemName);
+            updateUI();
+            document.getElementById('challenge-feedback').style.color = "#ffeb3b";
+            document.getElementById('challenge-feedback').innerText = `Bought ${itemName}!`;
+        }
+    }
+
+    generateQuestion();
+    updateUI();
+</script>
+
+</body>
+</html>
